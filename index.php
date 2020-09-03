@@ -4,16 +4,55 @@ get_header();
         <!-- Navigation-->
         <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
             <div class="container">
-                <a class="navbar-brand js-scroll-trigger" href="#page-top">ROMAGNAMI</a>
+                <a class="navbar-brand js-scroll-trigger text-uppercase" href="#page-top"><?php bloginfo('name'); ?></a>
                 <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ml-auto my-2 my-lg-0">
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#services">Services</a></li>
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#portfolio">Portfolio</a></li>
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#contact">Contact</a></li>
-                    </ul>
-                </div>
+                <?php
+                wp_nav_menu(
+                    array(
+                        'container_class' => 'collapse navbar-collapse',
+                        'container_id' => 'navbarResponsive',
+                        'menu_class' => 'navbar-nav ml-auto my-2 my-lg-0 text-uppercase',
+                        'theme_location' => 'main',
+                        'walker' => new RmgWalkerMainMenu()
+                    )
+                );
+                class RmgWalkerMainMenu extends Walker_Nav_Menu {
+                    function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+                        global $wp_query;
+                        $indent = ( $depth > 0 ? str_repeat( "    ", $depth ) : '' ); // code indent
+                        // Depth-dependent classes.
+                        $depth_classes = array(
+                            ( $depth == 0 ? 'main-menu-item' : 'sub-menu-item' ),
+                            ( $depth >=2 ? 'sub-sub-menu-item' : '' ),
+                            ( $depth % 2 ? 'menu-item-odd' : 'menu-item-even' ),
+                            'menu-item-depth-' . $depth
+                        );
+                        $depth_class_names = esc_attr( implode( ' ', $depth_classes ) );
+                        // Passed classes.
+                        $classes = empty( $item->classes ) ? array() : (array) $item->classes;
+                        $class_names = esc_attr( implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item ) ) );
+                        // Build HTML.
+                        $output .= $indent . '<li id="nav-menu-item-'. $item->ID . '" class="nav-item ' . $depth_class_names . ' ' . $class_names . '">';
+                        // Link attributes.
+                        $attributes  = ! empty( $item->attr_title ) ? ' title="'  . esc_attr( $item->attr_title ) .'"' : '';
+                        $attributes .= ! empty( $item->target )     ? ' target="' . esc_attr( $item->target     ) .'"' : '';
+                        $attributes .= ! empty( $item->xfn )        ? ' rel="'    . esc_attr( $item->xfn        ) .'"' : '';
+                        $attributes .= ! empty( $item->ID )         ? ' href="#pg'. esc_attr( $item->ID         ) .'"' : '';
+                        $attributes .= ' class="nav-link js-scroll-trigger menu-link ' . ( $depth > 0 ? 'sub-menu-link' : 'main-menu-link' ) . '"';
+                        $aclass = 'class="nav-link js-scroll-trigger"';
+                        $ahref = 'href="#page-'.$item->ID.'"';
+                        $item_output = sprintf( '%1$s<a%2$s>%3$s%4$s%5$s</a>%6$s',
+                            $args->before,
+                            $attributes,
+                            $args->link_before,
+                            apply_filters( 'the_title', $item->title, $item->ID ),
+                            $args->link_after,
+                            $args->after
+                        );
+                        $output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+                    }
+                }
+                ?>
             </div>
         </nav>
         <!-- Masthead-->
@@ -21,11 +60,13 @@ get_header();
             <div class="container h-100">
                 <div class="row h-100 align-items-center justify-content-center text-center">
                     <div class="col-lg-10 align-self-end">
-                        <h1 class="text-uppercase text-white font-weight-bold">Your Favorite Source of Free Bootstrap Themes</h1>
+                        <h1 class="text-uppercase text-white font-weight-bold"><?php bloginfo('name'); ?></h1>
                         <hr class="divider my-4" />
                     </div>
                     <div class="col-lg-8 align-self-baseline">
-                        <p class="text-white-75 font-weight-light mb-5">Start Bootstrap can help you build better websites using the Bootstrap framework! Just download a theme and start customizing, no strings attached!</p>
+                        <p class="text-white-75 font-weight-light mb-5">
+                            <?php bloginfo('description'); ?>
+                        </p>
                         <a class="btn btn-primary btn-xl js-scroll-trigger" href="#about">Find Out More</a>
                     </div>
                 </div>
