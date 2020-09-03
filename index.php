@@ -1,4 +1,5 @@
 <?php
+require_once("rmg-walker-main-menu.php");
 get_header();
 ?>
         <!-- Navigation-->
@@ -16,47 +17,11 @@ get_header();
                         'walker' => new RmgWalkerMainMenu()
                     )
                 );
-                class RmgWalkerMainMenu extends Walker_Nav_Menu {
-                    function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
-                        global $wp_query;
-                        $indent = ( $depth > 0 ? str_repeat( "    ", $depth ) : '' ); // code indent
-                        // Depth-dependent classes.
-                        $depth_classes = array(
-                            ( $depth == 0 ? 'main-menu-item' : 'sub-menu-item' ),
-                            ( $depth >=2 ? 'sub-sub-menu-item' : '' ),
-                            ( $depth % 2 ? 'menu-item-odd' : 'menu-item-even' ),
-                            'menu-item-depth-' . $depth
-                        );
-                        $depth_class_names = esc_attr( implode( ' ', $depth_classes ) );
-                        // Passed classes.
-                        $classes = empty( $item->classes ) ? array() : (array) $item->classes;
-                        $class_names = esc_attr( implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item ) ) );
-                        // Build HTML.
-                        $output .= $indent . '<li id="nav-menu-item-'. $item->ID . '" class="nav-item ' . $depth_class_names . ' ' . $class_names . '">';
-                        // Link attributes.
-                        $attributes  = ! empty( $item->attr_title ) ? ' title="'  . esc_attr( $item->attr_title ) .'"' : '';
-                        $attributes .= ! empty( $item->target )     ? ' target="' . esc_attr( $item->target     ) .'"' : '';
-                        $attributes .= ! empty( $item->xfn )        ? ' rel="'    . esc_attr( $item->xfn        ) .'"' : '';
-                        $attributes .= ! empty( $item->ID )         ? ' href="#pg'. esc_attr( $item->ID         ) .'"' : '';
-                        $attributes .= ' class="nav-link js-scroll-trigger menu-link ' . ( $depth > 0 ? 'sub-menu-link' : 'main-menu-link' ) . '"';
-                        $aclass = 'class="nav-link js-scroll-trigger"';
-                        $ahref = 'href="#page-'.$item->ID.'"';
-                        $item_output = sprintf( '%1$s<a%2$s>%3$s%4$s%5$s</a>%6$s',
-                            $args->before,
-                            $attributes,
-                            $args->link_before,
-                            apply_filters( 'the_title', $item->title, $item->ID ),
-                            $args->link_after,
-                            $args->after
-                        );
-                        $output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
-                    }
-                }
                 ?>
             </div>
         </nav>
         <!-- Masthead-->
-        <header class="masthead">
+        <header class="masthead" id="page-top">
             <div class="container h-100">
                 <div class="row h-100 align-items-center justify-content-center text-center">
                     <div class="col-lg-10 align-self-end">
@@ -126,83 +91,29 @@ get_header();
         <div id="portfolio">
             <div class="container-fluid p-0">
                 <div class="row no-gutters">
-                        <?php
-                        $i = 0;
-                        while ( have_posts() ) {
-                            the_post();
-                            $i ++;
-                        ?>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/1.jpg">
-                                <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/1.jpg" alt="" />
-                                <div class="portfolio-box-caption">
-                                    <div class="project-category text-white-50"><?=the_title()?></div>
-                                    <div class="project-name"><?=the_excerpt()?></div>
+                    <?php
+                    $i = 0;
+                    while ( have_posts() ) {
+                        the_post();
+                        $i ++;
+                    ?>
+                    <div class="col-lg-4 col-sm-6">
+                        <a class="portfolio-box" href="#" data-toggle="modal" data-target="#modal-details"
+                            data-id="<?=$post->ID?>">
+                            <img class="img-fluid" src="<?=the_post_thumbnail_url()?>" alt="" />
+                            <div class="portfolio-box-caption">
+                                <div class="project-category text-white-50" id="post-title-<?=$post->ID?>">
+                                    <?=the_title()?>
                                 </div>
-                            </a>
-                        </div>
-                        <?php
-                        }
-                        while ($i % 3 != 0) {
-                            $i++
-                        ?>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/1.jpg">
-                                <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/1.jpg" alt="" />
-                                <div class="portfolio-box-caption">
-                                    <div class="project-category text-white-50">placeholder</div>
-                                    <div class="project-name">boh</div>
-                                </div>
-                            </a>
-                        </div>
-                        <?php
-                        }
-                        ?>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/2.jpg">
-                            <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/2.jpg" alt="" />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project Name</div>
+                                <div class="project-name"><?=the_excerpt()?></div>
                             </div>
+                            <div id="post-content-<?=$post->ID?>" hidden><?=the_content()?></div>
+                            <div hidden><?=the_post_thumbnail_url()?></div>
                         </a>
                     </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/3.jpg">
-                            <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/3.jpg" alt="" />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project Name</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/4.jpg">
-                            <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/4.jpg" alt="" />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project Name</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/5.jpg">
-                            <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/5.jpg" alt="" />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project Name</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="<?=get_template_directory_uri()?>/assets/img/portfolio/fullsize/6.jpg">
-                            <img class="img-fluid" src="<?=get_template_directory_uri()?>/assets/img/portfolio/thumbnails/6.jpg" alt="" />
-                            <div class="portfolio-box-caption p-3">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project Name</div>
-                            </div>
-                        </a>
-                    </div>
+                    <?php
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -236,5 +147,22 @@ get_header();
                 </div>
             </div>
         </section>
+        <div id="modal-details" class="modal fade" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 id="modal-details-title" class="modal-title"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-details-content"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+                </div>
+                </div>
+            </div>
+        </div>
 <?php
 get_footer();
